@@ -86,10 +86,13 @@ addOption('sslOnly', false, '<bool>: set this to true to only serve over HTTPS')
 addOption('host', false, '<string>: start a server listening on the supplied hostname');
 addOption('port', 7801, '<number>: server port');
 addOption('rateLimit', false, '<number>: Argument is the max requests allowed in one minute. Disabled by default.');
+addOption('skipKey', false, '<number|string>: Option to be passed as an argument of enableRateLimmiter function. It allows bypassing the rate limmiter and should be provided with skipToken argument.');
+addOption('skipToken', false, '<number|string>: Option to be passed as an argument of enableRateLimmiter function. It allows bypassing the rate limmiter. and should be provided with skipKey argument.');
 
 addOption('logLevel', 2, '<number>: the log level. 0 = silent, 4 = verbose.');
 addOption('workers', false, '<number>: the number of workers to spawn');
 addOption('workLimit', 60, '<number>: the pieces of work that can be performed before restarting a phantom process');
+addOption('queueSize', 5, '<number>: the size of the request overfow queue');
 
 addOption('logDest', false, '<string>: path to log files. will also enable file logging.');
 addOption('logFile', 'highcharts-export-server.log', '<string>: filename to log to.');
@@ -191,12 +194,15 @@ if (options.enableServer || (options.host && options.host.length)) {
         listenToProcessExits: options.listenToProcessExits,
         initialWorkers: options.workers || 0,
         maxWorkers: options.workers || 4,
-        workLimit: options.workLimit
+        workLimit: options.workLimit,
+        queueSize: options.queueSize
     });
 
     if (options.rateLimit && options.rateLimit !== 0 && options.rateLimit !== false) {
         main.server.enableRateLimiting({
-            max: options.rateLimit
+            max: options.rateLimit,
+            skipKey: options.skipKey,
+            skipToken: options.skipToken
         });
     }
 
@@ -231,6 +237,7 @@ if (options.enableServer || (options.host && options.host.length)) {
             initialWorkers: options.workers || 5,
             maxWorkers: options.workers || 25,
             workLimit: options.workLimit,
+            queueSize: options.queueSize,
             reaper: false
         });
 
@@ -275,6 +282,7 @@ if (options.enableServer || (options.host && options.host.length)) {
             listenToProcessExits: options.listenToProcessExits,
             initialWorkers: options.workers || 1,
             maxWorkers: options.workers || 1 ,
+            queueSize: options.queueSize,
             reaper: false
         });
 
